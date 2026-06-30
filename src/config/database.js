@@ -1,10 +1,11 @@
 import mongoose from 'mongoose';
+import { MongoClient } from 'mongodb'
 import logger from '../utils/logger.js';
 
 /**
  * Connect to MongoDB using database URL from environment variables.
  */
-const connectDB = async () => {
+export const MongooseConnectDB = async () => {
   try {
     const dbUrl = process.env.DATABASE_URL.replace(
       '<db_password>',
@@ -28,4 +29,22 @@ const connectDB = async () => {
   }
 };
 
-export default connectDB;
+export const MongoConnectDB = () => {
+
+  try {
+    const dbUrl = process.env.DATABASE_URL.replace(
+      '<db_password>',
+      process.env.DATABASE_PASSWORD,
+    );
+
+    const client = new MongoClient(
+      dbUrl
+    );
+
+    return client;
+
+  } catch (error) {
+    logger.error(`Database connection error: ${error.message}`);
+    process.exit(1); // Exit process with failure code
+  }
+};

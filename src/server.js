@@ -9,7 +9,7 @@ process.on('uncaughtException', (err) => {
 // Load environment variables
 import 'dotenv/config';
 
-import connectDB from './config/database.js';
+import { MongooseConnectDB as connectDB } from './config/database.js';
 import app from './app.js';
 
 // 2) CONNECT TO DATABASE
