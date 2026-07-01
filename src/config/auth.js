@@ -3,10 +3,11 @@ import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { bearer } from "better-auth/plugins";
 import { MongoConnectDB } from "./database.js";
 
-const dbClient = MongoConnectDB();
+const dbClient = await MongoConnectDB();
 
 export const auth = betterAuth({
     database: mongodbAdapter(dbClient),
+    basePath: "/api/v1/auth",
     emailAndPassword: {
         enabled: true,
         autoSignIn: true

@@ -10,6 +10,9 @@ import globalErrorHandler from './middleware/errorMiddleware.js';
 import productRouter from './routes/productRoutes.js';
 import categoryRouter from './routes/categoryRoutes.js';
 import authRouter from './routes/authRoutes.js';
+import cartRouter from './routes/cartRoutes.js';
+import wishlistRouter from './routes/wishlistRoutes.js';
+import orderRouter from './routes/orderRoutes.js';
 
 const app = express();
 
@@ -67,6 +70,9 @@ app.get('/health', (req, res) => {
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/products', productRouter);
 app.use('/api/v1/categories', categoryRouter);
+app.use('/api/v1/cart', cartRouter);
+app.use('/api/v1/wishlist', wishlistRouter);
+app.use('/api/v1/orders', orderRouter);
 
 // Test error route to verify custom error handling
 app.get('/api/v1/test-error', (req, res) => {

@@ -29,19 +29,20 @@ export const MongooseConnectDB = async () => {
   }
 };
 
-export const MongoConnectDB = () => {
-
+export const MongoConnectDB = async () => {
   try {
     const dbUrl = process.env.DATABASE_URL.replace(
       '<db_password>',
       process.env.DATABASE_PASSWORD,
     );
 
-    const client = new MongoClient(
+    let client = new MongoClient(
       dbUrl
     );
 
-    return client;
+    await client.connect();
+
+    return client = client.db("ecommers");
 
   } catch (error) {
     logger.error(`Database connection error: ${error.message}`);

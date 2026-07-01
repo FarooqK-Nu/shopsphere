@@ -16,6 +16,7 @@ router.post("/sign-in/email", validate(loginSchema));
 router.get("/me", protect, getMe);
 
 // 3) Better Auth default route handler
-router.use(toNodeHandler(auth));
+// router.all(/(.*)/, toNodeHandler(auth));
+router.all('/{*splat}', toNodeHandler(auth));
 
 export default router;
