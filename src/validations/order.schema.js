@@ -1,17 +1,17 @@
 import { z } from 'zod';
 
-// ─── Shared sub-schemas ─────────────────────────────────────────────────────
+// Shared sub-schemas
 
 export const shippingAddressSchema = z.object({
-  fullName:   z.string().min(2, 'Full name must be at least 2 characters'),
-  phone:      z.string().min(7, 'Phone must be at least 7 characters'),
-  address:    z.string().min(5, 'Address must be at least 5 characters'),
-  city:       z.string().min(2, 'City must be at least 2 characters'),
+  fullName: z.string().min(2, 'Full name must be at least 2 characters'),
+  phone: z.string().min(7, 'Phone must be at least 7 characters'),
+  address: z.string().min(5, 'Address must be at least 5 characters'),
+  city: z.string().min(2, 'City must be at least 2 characters'),
   postalCode: z.string().min(3, 'Postal code must be at least 3 characters'),
-  country:    z.string().min(2, 'Country must be at least 2 characters')
+  country: z.string().min(2, 'Country must be at least 2 characters')
 });
 
-// ─── Order schemas ──────────────────────────────────────────────────────────
+// Order schemas 
 
 export const createOrderSchema = z.object({
   body: z.object({
@@ -34,7 +34,7 @@ export const updateOrderStatusSchema = z.object({
   })
 });
 
-// ─── Cart schemas ───────────────────────────────────────────────────────────
+// Cart schemas
 
 export const addToCartSchema = z.object({
   body: z.object({
@@ -59,7 +59,7 @@ export const updateCartItemSchema = z.object({
   })
 });
 
-// ─── Wishlist schemas ────────────────────────────────────────────────────────
+// Wishlist schemas 
 
 export const wishlistProductSchema = z.object({
   params: z.object({

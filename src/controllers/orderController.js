@@ -3,13 +3,14 @@ import Order from '../models/Order.js';
 import Cart from '../models/Cart.js';
 import Product from '../models/Product.js';
 import ApiError from '../utils/ApiError.js';
+import * as emailService from '../services/emailService.js';
 
-// ─── Pricing constants ────────────────────────────────────────────────────────
+// Pricing constants
 const TAX_RATE = 0.08;         // 8 % tax
 const FREE_SHIPPING_THRESHOLD = 100; // Free shipping above $100
 const SHIPPING_COST = 10;      // Flat shipping fee
 
-// ─── Helper: compute order pricing ───────────────────────────────────────────
+// Helper: compute order pricing
 const computePricing = (items) => {
   const itemsPrice = items.reduce(
     (sum, item) => sum + item.price * item.quantity,
@@ -21,7 +22,7 @@ const computePricing = (items) => {
   return { itemsPrice, shippingPrice, taxPrice, totalPrice };
 };
 
-// ─── POST /api/v1/orders ──────────────────────────────────────────────────────
+// POST /api/v1/orders
 /**
  * Create an order from the user's current cart.
  * Uses a MongoDB transaction to atomically:
@@ -109,6 +110,16 @@ export const createOrder = async (req, res) => {
     // 7) Commit
     await session.commitTransaction();
 
+    // Trigger confirmation email
+    order.user = req.user; // Attach user object for email address
+    emailService.sendOrderEmail(
+      order,
+      'Order Placed Successfully',
+      paymentMethod === 'CashOnDelivery'
+        ? 'Your order has been placed and confirmed (Cash on Delivery). We will process and ship it soon!'
+        : 'Your order has been placed and is pending payment via Stripe.'
+    );
+
     res.status(201).json({
       status: 'success',
       message: 'Order placed successfully',
@@ -122,14 +133,14 @@ export const createOrder = async (req, res) => {
   }
 };
 
-// ─── GET /api/v1/orders/my-orders ────────────────────────────────────────────
+// GET /api/v1/orders/my-orders
 /**
- * Return all orders belonging to the authenticated user (newest first).
+ * Return all orders belonging to the authenticated user (newest first) for current page.
  */
 export const getMyOrders = async (req, res) => {
-  const page  = Math.max(1, parseInt(req.query.page)  || 1);
+  const page = Math.max(1, parseInt(req.query.page) || 1);
   const limit = Math.min(50, parseInt(req.query.limit) || 10);
-  const skip  = (page - 1) * limit;
+  const skip = (page - 1) * limit;
 
   const [orders, total] = await Promise.all([
     Order.find({ user: req.user.id })
@@ -150,7 +161,7 @@ export const getMyOrders = async (req, res) => {
   });
 };
 
-// ─── GET /api/v1/orders/:id ───────────────────────────────────────────────────
+// GET /api/v1/orders/:id
 /**
  * Get a single order by ID.
  * Customers can only view their own orders; Admins can view any.
@@ -174,7 +185,7 @@ export const getOrder = async (req, res) => {
   });
 };
 
-// ─── PATCH /api/v1/orders/:id/cancel ─────────────────────────────────────────
+// PATCH /api/v1/orders/:id/cancel
 /**
  * Cancel an order (Customer action).
  * Only allowed while the order is in Pending or Confirmed state.
@@ -212,6 +223,14 @@ export const cancelOrder = async (req, res) => {
 
     await session.commitTransaction();
 
+    // Trigger cancellation email
+    order.user = req.user;
+    emailService.sendOrderEmail(
+      order,
+      'Order Cancelled',
+      'Your order has been successfully cancelled, and the items have been restored to inventory.'
+    );
+
     res.status(200).json({
       status: 'success',
       message: 'Order cancelled and inventory restored',
@@ -225,18 +244,16 @@ export const cancelOrder = async (req, res) => {
   }
 };
 
-// ═══════════════════════════════════════════════════════════════════════════════
 // ADMIN ROUTES
-// ═══════════════════════════════════════════════════════════════════════════════
 
-// ─── GET /api/v1/orders (Admin) ───────────────────────────────────────────────
+// GET /api/v1/orders (Admin)
 /**
  * Admin: get all orders with optional status filter and pagination.
  */
 export const getAllOrders = async (req, res) => {
-  const page   = Math.max(1, parseInt(req.query.page)   || 1);
-  const limit  = Math.min(100, parseInt(req.query.limit) || 20);
-  const skip   = (page - 1) * limit;
+  const page = Math.max(1, parseInt(req.query.page) || 1);
+  const limit = Math.min(100, parseInt(req.query.limit) || 20);
+  const skip = (page - 1) * limit;
   const filter = req.query.status ? { status: req.query.status } : {};
 
   const [orders, total] = await Promise.all([
@@ -258,7 +275,7 @@ export const getAllOrders = async (req, res) => {
   });
 };
 
-// ─── PATCH /api/v1/orders/:id/status (Admin) ─────────────────────────────────
+// PATCH /api/v1/orders/:id/status (Admin)
 /**
  * Admin: update order status along the lifecycle.
  * Enforces the valid state transition order.
@@ -284,7 +301,7 @@ export const updateOrderStatus = async (req, res) => {
   // Enforce forward-only transitions (except Admin can cancel from any state)
   if (status !== 'Cancelled') {
     const currentIndex = STATUS_ORDER.indexOf(order.status);
-    const newIndex     = STATUS_ORDER.indexOf(status);
+    const newIndex = STATUS_ORDER.indexOf(status);
     if (newIndex <= currentIndex) {
       throw new ApiError(
         `Cannot move order from "${order.status}" to "${status}". Status can only move forward.`,
@@ -329,6 +346,16 @@ export const updateOrderStatus = async (req, res) => {
   } else {
     order.status = status;
     await order.save();
+  }
+
+  // Populate user info for order update email
+  const populatedOrder = await Order.findById(order._id).populate('user');
+  if (populatedOrder) {
+    emailService.sendOrderEmail(
+      populatedOrder,
+      `Order Status Update: ${status}`,
+      `Your order status has been updated to "${status}".`
+    );
   }
 
   res.status(200).json({

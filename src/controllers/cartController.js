@@ -11,7 +11,7 @@ const getOrCreateCart = async (userId) => {
   return cart;
 };
 
-// ─── GET /api/v1/cart ────────────────────────────────────────────────────────
+// GET /api/v1/cart
 
 export const getCart = async (req, res) => {
   const cart = await getOrCreateCart(req.user.id);
@@ -22,7 +22,7 @@ export const getCart = async (req, res) => {
   });
 };
 
-// ─── POST /api/v1/cart ───────────────────────────────────────────────────────
+// POST /api/v1/cart
 
 export const addToCart = async (req, res) => {
   const { productId, quantity } = req.body;
@@ -44,14 +44,15 @@ export const addToCart = async (req, res) => {
     (item) => item.product.toString() === productId
   );
 
-  if (existingIndex >= 0) {
-    // Update quantity — also validate against total stock
+  if (existingIndex >= 0) { // item already in cart before
+    // Update quantity — also validate again against total stock available
     const newQty = cart.items[existingIndex].quantity + quantity;
     if (product.stockQuantity < newQty) {
       throw new ApiError(`Only ${product.stockQuantity} unit(s) available in stock`, 400);
     }
     cart.items[existingIndex].quantity = newQty;
-  } else {
+
+  } else { // if item is not in cart before
     // Add new item with price snapshot
     const effectivePrice = product.discount > 0 ? product.price - product.discount : product.price;
     cart.items.push({
@@ -71,7 +72,7 @@ export const addToCart = async (req, res) => {
   });
 };
 
-// ─── PATCH /api/v1/cart/:productId ──────────────────────────────────────────
+// PATCH /api/v1/cart/:productId
 
 export const updateCartItem = async (req, res) => {
   const { productId } = req.params;
@@ -102,7 +103,7 @@ export const updateCartItem = async (req, res) => {
   });
 };
 
-// ─── DELETE /api/v1/cart/:productId ─────────────────────────────────────────
+// DELETE /api/v1/cart/:productId
 
 export const removeFromCart = async (req, res) => {
   const { productId } = req.params;
@@ -126,7 +127,7 @@ export const removeFromCart = async (req, res) => {
   });
 };
 
-// ─── DELETE /api/v1/cart ─────────────────────────────────────────────────────
+// DELETE /api/v1/cart
 
 export const clearCart = async (req, res) => {
   const cart = await Cart.findOneAndUpdate(

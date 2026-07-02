@@ -31,7 +31,7 @@ const validate = (schema) => (req, res, next) => {
 
   if (!result.success) {
     const errorMessages = result.error.issues.map((issue) => issue.message);
-    return next(new ApiError(errorMessages.join(', '), 400));
+    throw new ApiError(errorMessages.join(', '), 400);
   }
 
   // Merge validated data back

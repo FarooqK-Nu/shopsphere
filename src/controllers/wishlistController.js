@@ -3,7 +3,7 @@ import Product from '../models/Product.js';
 import Cart from '../models/Cart.js';
 import ApiError from '../utils/ApiError.js';
 
-// ─── GET /api/v1/wishlist ────────────────────────────────────────────────────
+// GET /api/v1/wishlist
 
 export const getWishlist = async (req, res) => {
   let wishlist = await Wishlist.findOne({ user: req.user.id }).populate(
@@ -22,7 +22,7 @@ export const getWishlist = async (req, res) => {
   });
 };
 
-// ─── POST /api/v1/wishlist/:productId ───────────────────────────────────────
+// POST /api/v1/wishlist/:productId
 
 export const addToWishlist = async (req, res) => {
   const { productId } = req.params;
@@ -51,7 +51,7 @@ export const addToWishlist = async (req, res) => {
   });
 };
 
-// ─── DELETE /api/v1/wishlist/:productId ─────────────────────────────────────
+// DELETE /api/v1/wishlist/:productId
 
 export const removeFromWishlist = async (req, res) => {
   const { productId } = req.params;
@@ -73,7 +73,7 @@ export const removeFromWishlist = async (req, res) => {
   });
 };
 
-// ─── POST /api/v1/wishlist/:productId/move-to-cart ──────────────────────────
+// POST /api/v1/wishlist/:productId/move-to-cart
 
 export const moveToCart = async (req, res) => {
   const { productId } = req.params;

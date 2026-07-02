@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-// ─── Embedded sub-schemas ───────────────────────────────────────────────────
+// Embedded sub-schemas
 
 const orderItemSchema = new mongoose.Schema(
   {
@@ -29,27 +29,27 @@ const orderItemSchema = new mongoose.Schema(
 
 const shippingAddressSchema = new mongoose.Schema(
   {
-    fullName:    { type: String, required: true },
-    phone:       { type: String, required: true },
-    address:     { type: String, required: true },
-    city:        { type: String, required: true },
-    postalCode:  { type: String, required: true },
-    country:     { type: String, required: true }
+    fullName: { type: String, required: true },
+    phone: { type: String, required: true },
+    address: { type: String, required: true },
+    city: { type: String, required: true },
+    postalCode: { type: String, required: true },
+    country: { type: String, required: true }
   },
   { _id: false }
 );
 
 const paymentResultSchema = new mongoose.Schema(
   {
-    id:           String,
-    status:       String,
-    update_time:  String,
+    id: String,
+    status: String,
+    update_time: String,
     email_address: String
   },
   { _id: false }
 );
 
-// ─── Main Order schema ──────────────────────────────────────────────────────
+// Main Order schema
 
 const orderSchema = new mongoose.Schema(
   {
