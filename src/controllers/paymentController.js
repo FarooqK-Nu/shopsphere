@@ -1,4 +1,6 @@
+import mongoose from 'mongoose';
 import Order from '../models/Order.js';
+import Product from '../models/Product.js';
 import ApiError from '../utils/ApiError.js';
 import * as paymentService from '../services/paymentService.js';
 import * as emailService from '../services/emailService.js';
@@ -63,7 +65,7 @@ export const handleStripeWebhook = async (req, res) => {
 
   // Process the checkout.session.completed event
   if (event.type === 'checkout.session.completed') {
-    const session = event.data.object;
+    const session = event.data.object; // session we created on line 35
     const orderId = session.metadata?.orderId;
 
     if (orderId) {
@@ -90,6 +92,52 @@ export const handleStripeWebhook = async (req, res) => {
         );
       } else {
         logger.error(`Webhook order not found: ${orderId}`);
+      }
+    }
+  }
+
+  // Process the checkout.session.expired event (occurs after expiration window ends)
+  if (event.type === 'checkout.session.expired') {
+    const session = event.data.object;
+    const orderId = session.metadata?.orderId;
+
+    if (orderId) {
+      const order = await Order.findById(orderId);
+      if (order && order.status === 'Pending') {
+        const dbSession = await mongoose.startSession();
+        dbSession.startTransaction();
+
+        try {
+          // Restore inventory for each product
+          for (const item of order.items) {
+            await Product.findByIdAndUpdate(
+              item.product,
+              { $inc: { stockQuantity: item.quantity } },
+              { session: dbSession }
+            );
+          }
+
+          order.status = 'Cancelled';
+          await order.save({ session: dbSession });
+
+          await dbSession.commitTransaction();
+          logger.info(`Order ${orderId} cancelled due to Stripe checkout session expiration. Stock restored.`);
+
+          // Notify the user about the checkout expiration
+          const populatedOrder = await Order.findById(orderId).populate('user');
+          if (populatedOrder) {
+            await emailService.sendOrderEmail(
+              populatedOrder,
+              'Order Cancelled — Checkout Expired',
+              'Your checkout session expired before payment was completed. The order has been cancelled and the items released.'
+            );
+          }
+        } catch (err) {
+          await dbSession.abortTransaction();
+          logger.error(`Failed to cancel expired order ${orderId}: ${err.message}`);
+        } finally {
+          dbSession.endSession();
+        }
       }
     }
   }

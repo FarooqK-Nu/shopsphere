@@ -17,13 +17,13 @@ const router = express.Router();
 // All order routes require authentication
 router.use(protect);
 
-// ── Customer routes ──────────────────────────────────────────────────────────
+// Customer routes
 router.post('/', validate(createOrderSchema), createOrder);          // POST   /api/v1/orders
 router.get('/my-orders', getMyOrders);                              // GET    /api/v1/orders/my-orders
 router.get('/:id', getOrder);                                       // GET    /api/v1/orders/:id
 router.patch('/:id/cancel', cancelOrder);                           // PATCH  /api/v1/orders/:id/cancel
 
-// ── Admin routes ─────────────────────────────────────────────────────────────
+// Admin routes
 router.get('/', restrictTo('Admin'), getAllOrders);                  // GET    /api/v1/orders
 router.patch(
   '/:id/status',

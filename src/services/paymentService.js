@@ -59,6 +59,7 @@ export const createCheckoutSession = async (order, successUrl, cancelUrl) => {
     cancel_url: cancelUrl,
     customer_email: order.shippingAddress.email || undefined, // fallback email if available
     client_reference_id: order._id.toString(),
+    expires_at: Math.floor(Date.now() / 1000) + 30 * 60, // expire in 30 minutes
     metadata: {
       orderId: order._id.toString()
     },

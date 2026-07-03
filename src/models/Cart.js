@@ -52,7 +52,7 @@ cartSchema.virtual('totalItems').get(function () {
   return this.items.reduce((acc, item) => acc + item.quantity, 0);
 });
 
-cartSchema.index({ user: 1 });
+// cartSchema.index({ user: 1 }); no need already unique true.
 
 const Cart = mongoose.model('Cart', cartSchema);
 export default Cart;
