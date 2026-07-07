@@ -1,5 +1,5 @@
 services:
-  # ── Node.js API ─────────────────────────────────────────────────────────────
+  # Node.js API
   api:
     build:
       context: .
@@ -33,13 +33,13 @@ services:
     networks:
       - shopsphere-network
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:3000/health"]
+      test: [ "CMD", "wget", "-qO-", "http://localhost:3000/health" ]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 15s
 
-  # ── Redis ────────────────────────────────────────────────────────────────────
+  # Redis
   redis:
     image: redis:7-alpine
     container_name: shopsphere-redis
@@ -52,17 +52,17 @@ services:
     networks:
       - shopsphere-network
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: [ "CMD", "redis-cli", "ping" ]
       interval: 10s
       timeout: 5s
       retries: 5
 
-# ── Volumes ──────────────────────────────────────────────────────────────────
+# Volumes
 volumes:
   redis-data:
     driver: local
 
-# ── Networks ─────────────────────────────────────────────────────────────────
+# Networks
 networks:
   shopsphere-network:
     driver: bridge

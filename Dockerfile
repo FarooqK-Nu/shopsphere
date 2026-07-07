@@ -1,4 +1,4 @@
-# ── Stage 1: Install dependencies ────────────────────────────────────────────
+# Stage 1: Install dependencies
 FROM node:22-alpine AS deps
 
 WORKDIR /app
@@ -7,7 +7,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev
 
-# ── Stage 2: Production image ─────────────────────────────────────────────────
+# Stage 2: Production image
 FROM node:22-alpine AS production
 
 WORKDIR /app
