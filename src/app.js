@@ -15,6 +15,7 @@ import wishlistRouter from './routes/wishlistRoutes.js';
 import orderRouter from './routes/orderRoutes.js';
 import reviewRouter from './routes/reviewRoutes.js';
 import paymentRouter from './routes/paymentRoutes.js';
+import adminRouter from './routes/adminRoutes.js';
 import { handleStripeWebhook } from './controllers/paymentController.js';
 
 const app = express();
@@ -81,6 +82,7 @@ app.use('/api/v1/wishlist', wishlistRouter);
 app.use('/api/v1/orders', orderRouter);
 app.use('/api/v1/reviews', reviewRouter);
 app.use('/api/v1/payment', paymentRouter);
+app.use('/api/v1/admin', adminRouter);
 
 // Test error route to verify custom error handling
 app.get('/api/v1/test-error', (req, res) => {

@@ -10,10 +10,12 @@ process.on('uncaughtException', (err) => {
 import 'dotenv/config';
 
 import { MongooseConnectDB as connectDB } from './config/database.js';
+import { connectRedis } from './config/redis.js';
 import app from './app.js';
 
-// 2) CONNECT TO DATABASE
+// 2) CONNECT TO DATABASE & REDIS
 connectDB();
+connectRedis();
 
 // 3) START SERVER
 const PORT = process.env.PORT || 3000;

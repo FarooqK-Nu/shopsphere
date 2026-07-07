@@ -48,7 +48,7 @@ const userSchema = new mongoose.Schema({
 });
 
 // Indexes for performance
-userSchema.index({ email: 1 });
+// userSchema.index({ email: 1 }); // email is already unique
 
 const User = mongoose.model('User', userSchema);
 export default User;
